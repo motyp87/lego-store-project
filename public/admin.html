@@ -1,0 +1,46 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin - Brick Masters</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav>
+        <div class="logo">Admin Dashboard</div>
+        <div class="links">
+            <a href="index.html">Store</a>
+            <a href="#" id="logoutBtn">Logout</a>
+        </div>
+    </nav>
+
+    <main>
+        <h2>Store Statistics (Aggregations)</h2>
+        <div id="statsContainer" class="widget">
+            </div>
+
+        <h2>Manage Products (CRUD)</h2>
+        <div class="add-product-form">
+            <input type="text" id="prodName" placeholder="Set Name">
+            <input type="number" id="prodPieces" placeholder="Pieces Count">
+            <input type="number" id="prodPrice" placeholder="Price (ILS)">
+            <button id="addBtn">Add Set</button>
+        </div>
+
+        <table id="productsTable">
+            <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Pieces</th>
+                    <th>Price</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody>
+                </tbody>
+        </table>
+    </main>
+
+    <script src="js/main.js"></script>
+</body>
+</html>

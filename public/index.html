@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Brick Masters - LEGO Store</title>
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav>
+        <div class="logo">Brick Masters</div>
+        <div class="links">
+            <a href="index.html">Home</a>
+            <a href="login.html" id="loginLink">Login / Register</a>
+            <a href="admin.html" id="adminLink" style="display: none;">Admin Panel</a>
+        </div>
+    </nav>
+
+    <main>
+        <h1>Welcome to the Ultimate LEGO Store</h1>
+        
+        <div id="weatherWidget" class="widget">
+            Loading delivery weather conditions...
+        </div>
+
+        <div class="currency-selector">
+            <label>Currency: </label>
+            <select id="currency">
+                <option value="ILS">ILS (₪)</option>
+                <option value="USD">USD ($)</option>
+                <option value="EUR">EUR (€)</option>
+            </select>
+        </div>
+
+        <div class="products-grid" id="productsContainer">
+            <p>Loading products...</p>
+        </div>
+    </main>
+
+    <script src="js/main.js"></script>
+</body>
+</html>
