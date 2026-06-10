@@ -1,12 +1,1 @@
-# Dependency directories
 node_modules/
-
-# Environment variables (for future use, if you save passwords here)
-.env
-
-# OS generated files
-.DS_Store
-Thumbs.db
-
-# Optional: Ignore log files
-npm-debug.log*

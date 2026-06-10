@@ -1,106 +1,85 @@
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap');
+
 * {
     box-sizing: border-box;
-    font-family: Arial, sans-serif;
+    font-family: 'Poppins', sans-serif;
 }
 
 body {
     margin: 0;
-    background-color: #f4f4f9;
+    background-color: #f0f2f5;
+    color: #333;
 }
 
+/* Navbar */
 nav {
     background-color: #e3000f; /* LEGO red */
     color: white;
-    padding: 15px 30px;
+    padding: 15px 40px;
     display: flex;
     justify-content: space-between;
     align-items: center;
+    box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+}
+
+.logo {
+    font-size: 24px;
+    font-weight: 700;
+    letter-spacing: 1px;
 }
 
 nav a {
     color: white;
     text-decoration: none;
     margin-left: 20px;
+    font-weight: 600;
+    transition: 0.3s;
 }
 
+nav a:hover {
+    color: #ffd500;
+}
+
+/* Hero Banner */
+.hero {
+    background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1518331647614-7a1f04cd34cb?q=80&w=1200') center/cover;
+    height: 300px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    color: white;
+    text-align: center;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+}
+
+.hero h1 {
+    font-size: 40px;
+    margin: 0;
+    text-transform: uppercase;
+    text-shadow: 2px 2px 4px rgba(0,0,0,0.7);
+}
+
+.hero p {
+    font-size: 18px;
+    margin-top: 10px;
+}
+
+/* Layout */
 main {
-    padding: 20px;
-    max-width: 1000px;
+    padding: 20px 40px;
+    max-width: 1400px;
     margin: 0 auto;
 }
 
-.widget {
-    background: #fff;
-    padding: 10px;
-    border-radius: 5px;
-    margin-bottom: 20px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-.auth-container {
-    display: flex;
-    gap: 30px;
-    justify-content: center;
-    margin-top: 50px;
-}
-
-.form-box {
-    background: white;
-    padding: 20px;
-    border-radius: 8px;
-    width: 300px;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-input, select, button {
-    width: 100%;
-    padding: 10px;
-    margin: 10px 0;
-    border: 1px solid #ccc;
-    border-radius: 4px;
-}
-
-button {
-    background-color: #ffd500; /* LEGO yellow */
-    border: none;
-    cursor: pointer;
-    font-weight: bold;
-}
-
-button:hover {
-    background-color: #e6c200;
-}
-
-.products-grid {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
-    gap: 20px;
-}
-
-.product-card {
-    background: white;
-    padding: 15px;
-    border-radius: 8px;
-    text-align: center;
-    box-shadow: 0 2px 5px rgba(0,0,0,0.1);
-}
-
-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 20px;
-}
-
-th, td {
-    padding: 10px;
-    border-bottom: 1px solid #ddd;
-    text-align: left;
-}
-
-/* Store Layout with Cart */
 .store-layout {
     display: flex;
-    gap: 20px;
+    gap: 30px;
 }
 
 .products-section {
@@ -111,17 +90,124 @@ th, td {
     flex: 1;
     align-self: flex-start;
     position: sticky;
-    top: 20px;
+    top: 90px; /* Below navbar */
+    background: white;
+    border-radius: 12px;
 }
 
-.cart-item {
-    display: flex;
-    justify-content: space-between;
-    margin-bottom: 10px;
+.widget {
+    background: #fff;
+    padding: 15px 20px;
+    border-radius: 12px;
+    margin-bottom: 20px;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+}
+
+/* Forms & Inputs */
+input, select, button {
+    width: 100%;
+    padding: 12px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 6px;
     font-size: 14px;
 }
 
-/* Modal Styles */
+button {
+    background-color: #ffd500;
+    border: none;
+    cursor: pointer;
+    font-weight: 700;
+    text-transform: uppercase;
+    transition: 0.3s;
+}
+
+button:hover {
+    background-color: #e6c200;
+    transform: translateY(-2px);
+}
+
+.btn-add {
+    background-color: #006cb7;
+    color: white;
+}
+.btn-add:hover { background-color: #005591; }
+
+.btn-checkout {
+    background-color: #28a745;
+    color: white;
+}
+.btn-checkout:hover { background-color: #218838; }
+
+/* Products Grid */
+.products-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+    gap: 25px;
+}
+
+.product-card {
+    background: white;
+    border-radius: 12px;
+    text-align: center;
+    box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+    transition: 0.3s;
+    overflow: hidden;
+    display: flex;
+    flex-direction: column;
+}
+
+.product-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 10px 20px rgba(0,0,0,0.15);
+}
+
+.product-img {
+    width: 100%;
+    height: 180px;
+    object-fit: contain;
+    background-color: #fff;
+    padding: 10px;
+    border-bottom: 1px solid #eee;
+}
+
+.product-info {
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.product-info h3 {
+    margin: 0 0 10px 0;
+    font-size: 16px;
+    color: #222;
+}
+
+.product-info p {
+    margin: 0;
+    color: #666;
+    font-size: 13px;
+}
+
+.product-info h4 {
+    margin: 15px 0;
+    font-size: 20px;
+    color: #e3000f;
+}
+
+/* Cart */
+.cart-item {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 12px;
+    font-size: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid #eee;
+}
+
+/* Modal */
 .modal {
     display: none;
     position: fixed;
@@ -130,16 +216,17 @@ th, td {
     top: 0;
     width: 100%;
     height: 100%;
-    background-color: rgba(0,0,0,0.5);
+    background-color: rgba(0,0,0,0.6);
+    backdrop-filter: blur(3px);
 }
 
 .modal-content {
-    background-color: #fefefe;
-    margin: 10% auto;
-    padding: 20px;
-    border-radius: 8px;
-    width: 300px;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.2);
+    background-color: #fff;
+    margin: 8% auto;
+    padding: 30px;
+    border-radius: 12px;
+    width: 350px;
+    box-shadow: 0 10px 25px rgba(0,0,0,0.2);
 }
 
 .close-btn {
@@ -150,6 +237,21 @@ th, td {
     cursor: pointer;
 }
 
-.close-btn:hover {
-    color: black;
+.close-btn:hover { color: #e3000f; }
+
+/* Admin Table */
+table {
+    width: 100%;
+    border-collapse: collapse;
+    background: white;
+    border-radius: 12px;
+    overflow: hidden;
 }
+
+th, td {
+    padding: 15px;
+    border-bottom: 1px solid #eee;
+    text-align: left;
+}
+
+th { background-color: #f8f9fa; }

@@ -8,52 +8,62 @@
 </head>
 <body>
     <nav>
-        <div class="logo">Brick Masters</div>
+        <div class="logo">🧱 Brick Masters</div>
         <div class="links">
-            <a href="index.html">Home</a>
+            <a href="index.html">Store</a>
             <a href="login.html" id="loginLink">Login / Register</a>
             <a href="admin.html" id="adminLink" style="display: none;">Admin Panel</a>
             <a href="#" id="logoutBtn" style="display: none;">Logout</a>
         </div>
     </nav>
 
-    <main class="store-layout">
-        <div class="products-section">
-            <h1>Welcome to the Ultimate LEGO Store</h1>
-            
-            <div id="weatherWidget" class="widget">Loading local delivery conditions...</div>
-
-            <div class="widget" style="display: flex; gap: 20px; align-items: center;">
-                <div class="currency-selector">
-                    <label>Currency: </label>
-                    <select id="currency">
-                        <option value="ILS">ILS (₪)</option>
-                        <option value="USD">USD ($)</option>
-                        <option value="EUR">EUR (€)</option>
-                    </select>
-                </div>
-                <div class="sort-selector">
-                    <label>Sort by: </label>
-                    <select id="sortProducts">
-                        <option value="name_asc">Name (A-Z)</option>
-                        <option value="price_asc">Price (Low to High)</option>
-                        <option value="price_desc">Price (High to Low)</option>
-                    </select>
-                </div>
-            </div>
-
-            <div class="products-grid" id="productsContainer">
-                <p>Loading products...</p>
-            </div>
+    <main>
+        <div class="hero">
+            <h1>Build Your Imagination</h1>
+            <p>The ultimate collection for every master builder</p>
         </div>
 
-        <aside class="cart-section widget">
-            <h2>Your Cart</h2>
-            <div id="cartItemsContainer"></div>
-            <hr>
-            <h3>Total: ₪<span id="cartTotal">0.00</span></h3>
-            <button id="checkoutBtn" style="background-color: #28a745; color: white;">Checkout</button>
-        </aside>
+        <div class="store-layout">
+            <div class="products-section">
+                
+                <div class="widget" style="display: flex; gap: 20px; align-items: center; flex-wrap: wrap;">
+                    <div class="currency-selector" style="flex: 1; min-width: 150px;">
+                        <label style="font-weight: 600; font-size: 14px;">Currency: </label>
+                        <select id="currency">
+                            <option value="ILS">ILS (₪)</option>
+                            <option value="USD">USD ($)</option>
+                            <option value="EUR">EUR (€)</option>
+                        </select>
+                    </div>
+                    <div class="sort-selector" style="flex: 1; min-width: 150px;">
+                        <label style="font-weight: 600; font-size: 14px;">Sort by: </label>
+                        <select id="sortProducts">
+                            <option value="name_asc">Name (A-Z)</option>
+                            <option value="price_asc">Price (Low to High)</option>
+                            <option value="price_desc">Price (High to Low)</option>
+                        </select>
+                    </div>
+                    <div class="shipping-selector" style="flex: 1; min-width: 200px;">
+                        <label style="font-weight: 600; font-size: 14px;">Ship To (API): </label>
+                        <select id="shippingCountry">
+                            <option value="">Loading countries...</option>
+                        </select>
+                    </div>
+                </div>
+
+                <div class="products-grid" id="productsContainer">
+                    <p>Loading products...</p>
+                </div>
+            </div>
+
+            <aside class="cart-section widget">
+                <h2 style="margin-top: 0; border-bottom: 2px solid #f0f2f5; padding-bottom: 10px;">🛒 Your Cart</h2>
+                <div id="cartItemsContainer"></div>
+                <hr style="border: 0; border-top: 1px solid #ddd; margin: 15px 0;">
+                <h3 style="display: flex; justify-content: space-between;">Total: <span>₪<span id="cartTotal">0.00</span></span></h3>
+                <button id="checkoutBtn" class="btn-checkout">Checkout</button>
+            </aside>
+        </div>
     </main>
 
     <script src="js/main.js"></script>

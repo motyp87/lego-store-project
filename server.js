@@ -69,8 +69,8 @@ app.get('/api/logout', (req, res) => {
 
 app.post('/api/products', async (req, res) => {
     if(!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({msg: "Unauthorized"});
-    const { name, pieces, price } = req.body;
-    await db.collection('products').insertOne({ name, pieces: Number(pieces), price: Number(price) });
+    const { name, setNumber, pieces, price } = req.body;
+    await db.collection('products').insertOne({ name, setNumber, pieces: Number(pieces), price: Number(price) });
     res.json({ success: true });
 });
 
@@ -83,10 +83,10 @@ app.get('/api/products', async (req, res) => {
 
 app.put('/api/products/:id', async (req, res) => {
     if(!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({msg: "Unauthorized"});
-    const { name, pieces, price } = req.body;
+    const { name, setNumber, pieces, price } = req.body;
     await db.collection('products').updateOne(
         { _id: new ObjectId(req.params.id) }, 
-        { $set: { name, pieces: Number(pieces), price: Number(price) } }
+        { $set: { name, setNumber, pieces: Number(pieces), price: Number(price) } }
     );
     res.json({ success: true });
 });

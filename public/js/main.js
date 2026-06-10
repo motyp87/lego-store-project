@@ -1,5 +1,5 @@
 let exchangeRates = { ILS: 1, USD: 0.28, EUR: 0.25 };
-let cart = JSON.parse(localStorage.getItem('shoppingCart')) || []; // Load cart from local storage
+let cart = JSON.parse(localStorage.getItem('shoppingCart')) || []; 
 
 document.addEventListener('DOMContentLoaded', async () => {
     
@@ -24,29 +24,40 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 
     // --- HOME PAGE LOGIC (index.html) ---
-    if (document.getElementById('weatherWidget')) {
+    if (document.getElementById('productsContainer')) {
         try {
-            const weatherRes = await fetch('https://api.open-meteo.com/v1/forecast?latitude=32.08&longitude=34.88&current_weather=true');
-            const weatherData = await weatherRes.json();
-            document.getElementById('weatherWidget').innerHTML = `<strong>Delivery Weather Status:</strong> ${weatherData.current_weather.temperature}°C, Wind: ${weatherData.current_weather.windspeed} km/h.`;
-
+            // API 1: Currency Rates
             const currencyRes = await fetch('https://api.exchangerate-api.com/v4/latest/ILS');
             const currencyData = await currencyRes.json();
             exchangeRates = currencyData.rates;
+
+            // API 2: RestCountries for Shipping Destinations
+            const countriesRes = await fetch('https://restcountries.com/v3.1/all?fields=name');
+            const countries = await countriesRes.json();
+            countries.sort((a,b) => a.name.common.localeCompare(b.name.common));
+            
+            const shippingSelect = document.getElementById('shippingCountry');
+            shippingSelect.innerHTML = '<option value="">Select Destination...</option>';
+            countries.forEach(c => {
+                shippingSelect.innerHTML += `<option value="${c.name.common}">${c.name.common}</option>`;
+            });
+
         } catch (err) {
             console.log("API load error", err);
         }
 
         loadStoreProducts();
-        renderCart(); // Show cart on load
+        renderCart();
 
         document.getElementById('currency').addEventListener('change', loadStoreProducts);
         document.getElementById('sortProducts').addEventListener('change', loadStoreProducts);
 
-        // Checkout Button
         document.getElementById('checkoutBtn').addEventListener('click', () => {
             if (cart.length === 0) return alert('Your cart is empty!');
-            alert("Checkout completed successfully");
+            const dest = document.getElementById('shippingCountry').value;
+            if (!dest) return alert('Please select a shipping destination first!');
+            
+            alert(`Checkout completed successfully! Your order is being prepared for shipping to ${dest}.`);
             cart = [];
             saveCart();
             renderCart();
@@ -60,18 +71,20 @@ document.addEventListener('DOMContentLoaded', async () => {
 
         document.getElementById('addBtn').addEventListener('click', async () => {
             const name = document.getElementById('prodName').value;
+            const setNumber = document.getElementById('prodSetNumber').value;
             const pieces = document.getElementById('prodPieces').value;
             const price = document.getElementById('prodPrice').value;
             
-            if(!name || !pieces || !price) return alert('Fill all fields');
+            if(!name || !pieces || !price || !setNumber) return alert('Fill all fields');
 
             await fetch('/api/products', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, pieces, price })
+                body: JSON.stringify({ name, setNumber, pieces, price })
             });
             
             document.getElementById('prodName').value = '';
+            document.getElementById('prodSetNumber').value = '';
             document.getElementById('prodPieces').value = '';
             document.getElementById('prodPrice').value = '';
             
@@ -79,7 +92,6 @@ document.addEventListener('DOMContentLoaded', async () => {
             loadAggregations();
         });
 
-        // Modal Logic
         document.getElementById('closeModal').addEventListener('click', () => {
             document.getElementById('editModal').style.display = 'none';
         });
@@ -87,13 +99,14 @@ document.addEventListener('DOMContentLoaded', async () => {
         document.getElementById('saveEditBtn').addEventListener('click', async () => {
             const id = document.getElementById('editId').value;
             const name = document.getElementById('editName').value;
+            const setNumber = document.getElementById('editSetNumber').value;
             const pieces = document.getElementById('editPieces').value;
             const price = document.getElementById('editPrice').value;
 
             await fetch(`/api/products/${id}`, {
                 method: 'PUT',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ name, pieces, price })
+                body: JSON.stringify({ name, setNumber, pieces, price })
             });
 
             document.getElementById('editModal').style.display = 'none';
@@ -102,7 +115,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // --- LOGIN / REGISTER LOGIC (login.html) ---
+    // Auth Forms (Login/Register)
     const registerForm = document.getElementById('registerForm');
     if (registerForm) {
         registerForm.addEventListener('submit', async (e) => {
@@ -154,32 +167,39 @@ async function loadStoreProducts() {
     const container = document.getElementById('productsContainer');
     container.innerHTML = '';
 
+    // Working generic fallback image
+    const fallbackImage = 'https://images.unsplash.com/photo-1587654780291-39c9404d746b?q=80&w=400';
+
     products.forEach(p => {
         const convertedPrice = (p.price * exchangeRates[currency]).toFixed(2);
         const symbol = currency === 'ILS' ? '₪' : (currency === 'USD' ? '$' : '€');
+        
+        // Smart URL: Pulls real box art from Brickset based on Set Number
+        const imgUrl = p.setNumber ? `https://images.brickset.com/sets/images/${p.setNumber}-1.jpg` : fallbackImage;
 
-        // Note: Adding an "Add to Cart" button
         container.innerHTML += `
             <div class="product-card">
-                <h3>${p.name}</h3>
-                <p>Pieces: ${p.pieces}</p>
-                <h4>Price: ${convertedPrice}${symbol}</h4>
-                <button onclick="addToCart('${p.name}', ${p.price})" style="width:auto; padding:5px 10px;">Add to Cart</button>
+                <img src="${imgUrl}" alt="${p.name}" class="product-img" onerror="this.src='${fallbackImage}'">
+                <div class="product-info">
+                    <h3>${p.name}</h3>
+                    <p style="color:#888;">Set #${p.setNumber || 'N/A'}</p>
+                    <p>🧩 ${p.pieces} Pieces</p>
+                    <div style="flex-grow: 1;"></div>
+                    <h4>${convertedPrice}${symbol}</h4>
+                    <button class="btn-add" onclick="addToCart('${p.name.replace(/'/g, "\\'")}', ${p.price})">Add to Cart</button>
+                </div>
             </div>
         `;
     });
 }
 
-// Shopping Cart Functions
 window.addToCart = (name, price) => {
     cart.push({ name, price });
     saveCart();
     renderCart();
 };
 
-function saveCart() {
-    localStorage.setItem('shoppingCart', JSON.stringify(cart));
-}
+function saveCart() { localStorage.setItem('shoppingCart', JSON.stringify(cart)); }
 
 function renderCart() {
     const container = document.getElementById('cartItemsContainer');
@@ -193,11 +213,10 @@ function renderCart() {
         container.innerHTML += `
             <div class="cart-item">
                 <span>${item.name}</span>
-                <span>₪${item.price} <a href="#" onclick="removeFromCart(${index}); return false;" style="color:red; text-decoration:none;">X</a></span>
+                <span>₪${item.price} <a href="#" onclick="removeFromCart(${index}); return false;" style="color:#e3000f; text-decoration:none; margin-left:10px; font-weight:bold;">X</a></span>
             </div>
         `;
     });
-
     totalEl.innerText = total.toFixed(2);
 }
 
@@ -218,27 +237,29 @@ async function loadAdminProducts() {
         tbody.innerHTML += `
             <tr>
                 <td>${p.name}</td>
+                <td>${p.setNumber || '-'}</td>
                 <td>${p.pieces}</td>
                 <td>₪${p.price}</td>
                 <td>
-                    <button onclick="openEditModal('${p._id}', '${p.name}', ${p.pieces}, ${p.price})" style="width:auto; padding:5px; background:lightblue;">Edit</button>
-                    <button onclick="deleteProduct('${p._id}')" style="width:auto; padding:5px; background:salmon;">Delete</button>
+                    <button onclick="openEditModal('${p._id}', '${p.name.replace(/'/g, "\\'")}', '${p.setNumber}', ${p.pieces}, ${p.price})" style="width:auto; padding:5px 10px; background:lightblue; color:black;">Edit</button>
+                    <button onclick="deleteProduct('${p._id}')" style="width:auto; padding:5px 10px; background:salmon; color:black;">Delete</button>
                 </td>
             </tr>
         `;
     });
 }
 
-window.openEditModal = (id, name, pieces, price) => {
+window.openEditModal = (id, name, setNumber, pieces, price) => {
     document.getElementById('editId').value = id;
     document.getElementById('editName').value = name;
+    document.getElementById('editSetNumber').value = setNumber !== 'undefined' ? setNumber : '';
     document.getElementById('editPieces').value = pieces;
     document.getElementById('editPrice').value = price;
     document.getElementById('editModal').style.display = 'block';
 };
 
 window.deleteProduct = async (id) => {
-    if(confirm("Are you sure?")) {
+    if(confirm("Are you sure you want to delete this set?")) {
         await fetch(`/api/products/${id}`, { method: 'DELETE' });
         loadAdminProducts();
         loadAggregations();
@@ -251,7 +272,7 @@ async function loadAggregations() {
     const overview = await overviewRes.json();
     const categories = await catRes.json();
 
-    let html = `<p><strong>Total Items:</strong> ${overview.count} | <strong>Avg Price:</strong> ₪${overview.avgPrice ? overview.avgPrice.toFixed(2) : 0} | <strong>Total Pieces:</strong> ${overview.totalPieces}</p><hr><p><strong>Inventory Breakdown:</strong><br>`;
+    let html = `<p><strong>Total Sets:</strong> ${overview.count} | <strong>Avg Price:</strong> ₪${overview.avgPrice ? overview.avgPrice.toFixed(2) : 0} | <strong>Total Pieces:</strong> ${overview.totalPieces}</p><hr><p><strong>Inventory Breakdown:</strong><br>`;
     categories.forEach(c => { html += `- ${c._id}: ${c.count} sets<br>`; });
     statsContainer.innerHTML = html + "</p>";
 }
