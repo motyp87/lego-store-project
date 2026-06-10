@@ -13,6 +13,7 @@
             <a href="index.html">Home</a>
             <a href="login.html" id="loginLink">Login / Register</a>
             <a href="admin.html" id="adminLink" style="display: none;">Admin Panel</a>
+            <a href="#" id="logoutBtn" style="display: none;">Logout</a>
         </div>
     </nav>
 
@@ -20,16 +21,27 @@
         <h1>Welcome to the Ultimate LEGO Store</h1>
         
         <div id="weatherWidget" class="widget">
-            Loading delivery weather conditions...
+            Loading local delivery conditions...
         </div>
 
-        <div class="currency-selector">
-            <label>Currency: </label>
-            <select id="currency">
-                <option value="ILS">ILS (₪)</option>
-                <option value="USD">USD ($)</option>
-                <option value="EUR">EUR (€)</option>
-            </select>
+        <div class="widget" style="display: flex; gap: 20px; align-items: center;">
+            <div class="currency-selector">
+                <label>Currency: </label>
+                <select id="currency">
+                    <option value="ILS">ILS (₪)</option>
+                    <option value="USD">USD ($)</option>
+                    <option value="EUR">EUR (€)</option>
+                </select>
+            </div>
+
+            <div class="sort-selector">
+                <label>Sort by: </label>
+                <select id="sortProducts">
+                    <option value="name_asc">Name (A-Z)</option>
+                    <option value="price_asc">Price (Low to High)</option>
+                    <option value="price_desc">Price (High to Low)</option>
+                </select>
+            </div>
         </div>
 
         <div class="products-grid" id="productsContainer">
