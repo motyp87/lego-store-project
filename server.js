@@ -31,16 +31,17 @@ async function connectDB() {
 }
 connectDB();
 
-// --- AUTHENTICATION ROUTES ---
+// --- AUTHENTICATION ---
 
 app.post('/api/register', async (req, res) => {
-    const { username, password, role } = req.body;
+    const { username, password } = req.body;
     const users = db.collection('users');
     if(await users.findOne({ username })) {
         return res.json({ success: false, msg: "Username already exists" });
     }
     const hashedPassword = await bcrypt.hash(password, 10);
-    await users.insertOne({ username, password: hashedPassword, role });
+    // Force role to 'user' for all new registrations
+    await users.insertOne({ username, password: hashedPassword, role: 'user' });
     res.json({ success: true, msg: "Registration successful!" });
 });
 
@@ -64,9 +65,8 @@ app.get('/api/logout', (req, res) => {
     res.json({ success: true });
 });
 
-// --- CRUD ROUTES (PRODUCTS) ---
+// --- CRUD PRODUCTS ---
 
-// Create
 app.post('/api/products', async (req, res) => {
     if(!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({msg: "Unauthorized"});
     const { name, pieces, price } = req.body;
@@ -74,7 +74,6 @@ app.post('/api/products', async (req, res) => {
     res.json({ success: true });
 });
 
-// Read & Sort
 app.get('/api/products', async (req, res) => {
     const sortBy = req.query.sort || 'name';
     const order = req.query.order === 'desc' ? -1 : 1;
@@ -82,7 +81,6 @@ app.get('/api/products', async (req, res) => {
     res.json(products);
 });
 
-// Update
 app.put('/api/products/:id', async (req, res) => {
     if(!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({msg: "Unauthorized"});
     const { name, pieces, price } = req.body;
@@ -93,16 +91,14 @@ app.put('/api/products/:id', async (req, res) => {
     res.json({ success: true });
 });
 
-// Delete
 app.delete('/api/products/:id', async (req, res) => {
     if(!req.session.user || req.session.user.role !== 'admin') return res.status(403).json({msg: "Unauthorized"});
     await db.collection('products').deleteOne({ _id: new ObjectId(req.params.id) });
     res.json({ success: true });
 });
 
-// --- AGGREGATE ROUTES ---
+// --- AGGREGATIONS ---
 
-// Aggregate 1: Store Overview
 app.get('/api/stats/overview', async (req, res) => {
     const pipeline = [
         { $group: { _id: null, avgPrice: { $avg: "$price" }, totalPieces: { $sum: "$pieces" }, count: { $sum: 1 } } }
@@ -111,7 +107,6 @@ app.get('/api/stats/overview', async (req, res) => {
     res.json(stats[0] || { avgPrice: 0, totalPieces: 0, count: 0 });
 });
 
-// Aggregate 2: Categories (Premium vs Standard)
 app.get('/api/stats/categories', async (req, res) => {
     const pipeline = [
         { $project: { category: { $cond: [{ $gte: ["$price", 200] }, "Premium (200+)", "Standard"] } } },

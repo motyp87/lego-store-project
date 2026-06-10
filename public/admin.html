@@ -15,11 +15,10 @@
     </nav>
 
     <main>
-        <h2>Store Statistics (Aggregations)</h2>
-        <div id="statsContainer" class="widget">
-            </div>
+        <h2>Store Statistics</h2>
+        <div id="statsContainer" class="widget"></div>
 
-        <h2>Manage Products (CRUD)</h2>
+        <h2>Manage Products</h2>
         <div class="add-product-form">
             <input type="text" id="prodName" placeholder="Set Name">
             <input type="number" id="prodPieces" placeholder="Pieces Count">
@@ -36,10 +35,21 @@
                     <th>Actions</th>
                 </tr>
             </thead>
-            <tbody>
-                </tbody>
+            <tbody></tbody>
         </table>
     </main>
+
+    <div id="editModal" class="modal">
+        <div class="modal-content">
+            <span class="close-btn" id="closeModal">&times;</span>
+            <h2>Edit Product</h2>
+            <input type="hidden" id="editId">
+            <input type="text" id="editName" placeholder="Set Name">
+            <input type="number" id="editPieces" placeholder="Pieces Count">
+            <input type="number" id="editPrice" placeholder="Price (ILS)">
+            <button id="saveEditBtn">Save Changes</button>
+        </div>
+    </div>
 
     <script src="js/main.js"></script>
 </body>

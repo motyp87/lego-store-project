@@ -17,36 +17,43 @@
         </div>
     </nav>
 
-    <main>
-        <h1>Welcome to the Ultimate LEGO Store</h1>
-        
-        <div id="weatherWidget" class="widget">
-            Loading local delivery conditions...
-        </div>
+    <main class="store-layout">
+        <div class="products-section">
+            <h1>Welcome to the Ultimate LEGO Store</h1>
+            
+            <div id="weatherWidget" class="widget">Loading local delivery conditions...</div>
 
-        <div class="widget" style="display: flex; gap: 20px; align-items: center;">
-            <div class="currency-selector">
-                <label>Currency: </label>
-                <select id="currency">
-                    <option value="ILS">ILS (₪)</option>
-                    <option value="USD">USD ($)</option>
-                    <option value="EUR">EUR (€)</option>
-                </select>
+            <div class="widget" style="display: flex; gap: 20px; align-items: center;">
+                <div class="currency-selector">
+                    <label>Currency: </label>
+                    <select id="currency">
+                        <option value="ILS">ILS (₪)</option>
+                        <option value="USD">USD ($)</option>
+                        <option value="EUR">EUR (€)</option>
+                    </select>
+                </div>
+                <div class="sort-selector">
+                    <label>Sort by: </label>
+                    <select id="sortProducts">
+                        <option value="name_asc">Name (A-Z)</option>
+                        <option value="price_asc">Price (Low to High)</option>
+                        <option value="price_desc">Price (High to Low)</option>
+                    </select>
+                </div>
             </div>
 
-            <div class="sort-selector">
-                <label>Sort by: </label>
-                <select id="sortProducts">
-                    <option value="name_asc">Name (A-Z)</option>
-                    <option value="price_asc">Price (Low to High)</option>
-                    <option value="price_desc">Price (High to Low)</option>
-                </select>
+            <div class="products-grid" id="productsContainer">
+                <p>Loading products...</p>
             </div>
         </div>
 
-        <div class="products-grid" id="productsContainer">
-            <p>Loading products...</p>
-        </div>
+        <aside class="cart-section widget">
+            <h2>Your Cart</h2>
+            <div id="cartItemsContainer"></div>
+            <hr>
+            <h3>Total: ₪<span id="cartTotal">0.00</span></h3>
+            <button id="checkoutBtn" style="background-color: #28a745; color: white;">Checkout</button>
+        </aside>
     </main>
 
     <script src="js/main.js"></script>

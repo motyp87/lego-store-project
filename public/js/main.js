@@ -1,8 +1,9 @@
-let exchangeRates = { ILS: 1, USD: 0.28, EUR: 0.25 }; // Default fallback
+let exchangeRates = { ILS: 1, USD: 0.28, EUR: 0.25 };
+let cart = JSON.parse(localStorage.getItem('shoppingCart')) || []; // Load cart from local storage
 
 document.addEventListener('DOMContentLoaded', async () => {
     
-    // 1. Auth Check & Navbar Setup
+    // Auth Check
     const authRes = await fetch('/api/current-user');
     const authData = await authRes.json();
     
@@ -22,16 +23,13 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // 2. Load External APIs (Only on index.html)
+    // --- HOME PAGE LOGIC (index.html) ---
     if (document.getElementById('weatherWidget')) {
         try {
-            // API 1: OpenMeteo Weather (Local coordinates: Petah Tikva)
             const weatherRes = await fetch('https://api.open-meteo.com/v1/forecast?latitude=32.08&longitude=34.88&current_weather=true');
             const weatherData = await weatherRes.json();
-            document.getElementById('weatherWidget').innerHTML = 
-                `<strong>Delivery Weather Status:</strong> ${weatherData.current_weather.temperature}°C, Wind: ${weatherData.current_weather.windspeed} km/h. Conditions are good for shipping!`;
+            document.getElementById('weatherWidget').innerHTML = `<strong>Delivery Weather Status:</strong> ${weatherData.current_weather.temperature}°C, Wind: ${weatherData.current_weather.windspeed} km/h.`;
 
-            // API 2: ExchangeRate-API (Currency)
             const currencyRes = await fetch('https://api.exchangerate-api.com/v4/latest/ILS');
             const currencyData = await currencyRes.json();
             exchangeRates = currencyData.rates;
@@ -40,17 +38,26 @@ document.addEventListener('DOMContentLoaded', async () => {
         }
 
         loadStoreProducts();
+        renderCart(); // Show cart on load
 
         document.getElementById('currency').addEventListener('change', loadStoreProducts);
         document.getElementById('sortProducts').addEventListener('change', loadStoreProducts);
+
+        // Checkout Button
+        document.getElementById('checkoutBtn').addEventListener('click', () => {
+            if (cart.length === 0) return alert('Your cart is empty!');
+            alert("Checkout completed successfully");
+            cart = [];
+            saveCart();
+            renderCart();
+        });
     }
 
-    // 3. Admin Panel Logic (Only on admin.html)
+    // --- ADMIN PAGE LOGIC (admin.html) ---
     if (document.getElementById('productsTable')) {
         loadAdminProducts();
         loadAggregations();
 
-        // Create Product
         document.getElementById('addBtn').addEventListener('click', async () => {
             const name = document.getElementById('prodName').value;
             const pieces = document.getElementById('prodPieces').value;
@@ -71,21 +78,42 @@ document.addEventListener('DOMContentLoaded', async () => {
             loadAdminProducts();
             loadAggregations();
         });
+
+        // Modal Logic
+        document.getElementById('closeModal').addEventListener('click', () => {
+            document.getElementById('editModal').style.display = 'none';
+        });
+
+        document.getElementById('saveEditBtn').addEventListener('click', async () => {
+            const id = document.getElementById('editId').value;
+            const name = document.getElementById('editName').value;
+            const pieces = document.getElementById('editPieces').value;
+            const price = document.getElementById('editPrice').value;
+
+            await fetch(`/api/products/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ name, pieces, price })
+            });
+
+            document.getElementById('editModal').style.display = 'none';
+            loadAdminProducts();
+            loadAggregations();
+        });
     }
 
-    // Login & Register Form Logic (from Version 2)
+    // --- LOGIN / REGISTER LOGIC (login.html) ---
     const registerForm = document.getElementById('registerForm');
     if (registerForm) {
         registerForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const username = document.getElementById('regUsername').value;
             const password = document.getElementById('regPassword').value;
-            const role = document.getElementById('regRole').value;
 
             const res = await fetch('/api/register', {
                 method: 'POST',
                 headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({ username, password, role })
+                body: JSON.stringify({ username, password })
             });
             const data = await res.json();
             document.getElementById('regMsg').innerText = data.msg;
@@ -114,7 +142,7 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-// --- Helper Functions ---
+// --- HELPER FUNCTIONS ---
 
 async function loadStoreProducts() {
     const sortVal = document.getElementById('sortProducts').value.split('_');
@@ -127,19 +155,57 @@ async function loadStoreProducts() {
     container.innerHTML = '';
 
     products.forEach(p => {
-        // Calculate price based on API exchange rate
         const convertedPrice = (p.price * exchangeRates[currency]).toFixed(2);
         const symbol = currency === 'ILS' ? '₪' : (currency === 'USD' ? '$' : '€');
 
+        // Note: Adding an "Add to Cart" button
         container.innerHTML += `
             <div class="product-card">
                 <h3>${p.name}</h3>
                 <p>Pieces: ${p.pieces}</p>
                 <h4>Price: ${convertedPrice}${symbol}</h4>
+                <button onclick="addToCart('${p.name}', ${p.price})" style="width:auto; padding:5px 10px;">Add to Cart</button>
             </div>
         `;
     });
 }
+
+// Shopping Cart Functions
+window.addToCart = (name, price) => {
+    cart.push({ name, price });
+    saveCart();
+    renderCart();
+};
+
+function saveCart() {
+    localStorage.setItem('shoppingCart', JSON.stringify(cart));
+}
+
+function renderCart() {
+    const container = document.getElementById('cartItemsContainer');
+    const totalEl = document.getElementById('cartTotal');
+    
+    container.innerHTML = '';
+    let total = 0;
+
+    cart.forEach((item, index) => {
+        total += item.price;
+        container.innerHTML += `
+            <div class="cart-item">
+                <span>${item.name}</span>
+                <span>₪${item.price} <a href="#" onclick="removeFromCart(${index}); return false;" style="color:red; text-decoration:none;">X</a></span>
+            </div>
+        `;
+    });
+
+    totalEl.innerText = total.toFixed(2);
+}
+
+window.removeFromCart = (index) => {
+    cart.splice(index, 1);
+    saveCart();
+    renderCart();
+};
 
 async function loadAdminProducts() {
     const res = await fetch('/api/products');
@@ -155,7 +221,7 @@ async function loadAdminProducts() {
                 <td>${p.pieces}</td>
                 <td>₪${p.price}</td>
                 <td>
-                    <button onclick="editProduct('${p._id}', '${p.name}', ${p.pieces}, ${p.price})" style="width:auto; padding:5px; background:lightblue;">Edit</button>
+                    <button onclick="openEditModal('${p._id}', '${p.name}', ${p.pieces}, ${p.price})" style="width:auto; padding:5px; background:lightblue;">Edit</button>
                     <button onclick="deleteProduct('${p._id}')" style="width:auto; padding:5px; background:salmon;">Delete</button>
                 </td>
             </tr>
@@ -163,23 +229,14 @@ async function loadAdminProducts() {
     });
 }
 
-// Update Product
-window.editProduct = async (id, oldName, oldPieces, oldPrice) => {
-    const name = prompt("Update Product Name:", oldName);
-    if (!name) return;
-    const pieces = prompt("Update Pieces Count:", oldPieces);
-    const price = prompt("Update Price (ILS):", oldPrice);
-
-    await fetch(`/api/products/${id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ name, pieces, price })
-    });
-    loadAdminProducts();
-    loadAggregations();
+window.openEditModal = (id, name, pieces, price) => {
+    document.getElementById('editId').value = id;
+    document.getElementById('editName').value = name;
+    document.getElementById('editPieces').value = pieces;
+    document.getElementById('editPrice').value = price;
+    document.getElementById('editModal').style.display = 'block';
 };
 
-// Delete Product
 window.deleteProduct = async (id) => {
     if(confirm("Are you sure?")) {
         await fetch(`/api/products/${id}`, { method: 'DELETE' });
@@ -188,23 +245,13 @@ window.deleteProduct = async (id) => {
     }
 };
 
-// Aggregations Loader
 async function loadAggregations() {
     const statsContainer = document.getElementById('statsContainer');
-    
-    const [overviewRes, catRes] = await Promise.all([
-        fetch('/api/stats/overview'),
-        fetch('/api/stats/categories')
-    ]);
-    
+    const [overviewRes, catRes] = await Promise.all([ fetch('/api/stats/overview'), fetch('/api/stats/categories') ]);
     const overview = await overviewRes.json();
     const categories = await catRes.json();
 
     let html = `<p><strong>Total Items:</strong> ${overview.count} | <strong>Avg Price:</strong> ₪${overview.avgPrice ? overview.avgPrice.toFixed(2) : 0} | <strong>Total Pieces:</strong> ${overview.totalPieces}</p><hr><p><strong>Inventory Breakdown:</strong><br>`;
-    
-    categories.forEach(c => {
-        html += `- ${c._id}: ${c.count} sets<br>`;
-    });
-
+    categories.forEach(c => { html += `- ${c._id}: ${c.count} sets<br>`; });
     statsContainer.innerHTML = html + "</p>";
 }
