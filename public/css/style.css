@@ -45,7 +45,7 @@ nav a:hover {
 
 /* Hero Banner */
 .hero {
-    background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1518331647614-7a1f04cd34cb?q=80&w=1200') center/cover;
+    background: linear-gradient(rgba(0, 0, 0, 0.4), rgba(0, 0, 0, 0.7)), url('https://images.unsplash.com/photo-1587654780291-39c9404d746b?q=80&w=1200&auto=format&fit=crop') center/cover;
     height: 300px;
     display: flex;
     flex-direction: column;
