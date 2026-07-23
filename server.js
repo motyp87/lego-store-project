@@ -109,7 +109,7 @@ app.get('/api/stats/overview', async (req, res) => {
 
 app.get('/api/stats/categories', async (req, res) => {
     const pipeline = [
-        { $project: { category: { $cond: [{ $gte: ["$price", 200] }, "Premium (200+)", "Standard"] } } },
+        { $project: { category: { $cond: [{ $gte: ["$price", 500] }, "Premium (500+)", "Standard"] } } },
         { $group: { _id: "$category", count: { $sum: 1 } } }
     ];
     const stats = await db.collection('products').aggregate(pipeline).toArray();
