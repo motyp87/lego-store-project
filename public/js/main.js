@@ -1,9 +1,10 @@
+// Global state
 let exchangeRates = { ILS: 1, USD: 0.28, EUR: 0.25 };
 let cart = JSON.parse(localStorage.getItem('shoppingCart')) || []; 
 
 document.addEventListener('DOMContentLoaded', async () => {
     
-    // Auth Check
+    // --- Authentication Check ---
     const authRes = await fetch('/api/current-user');
     const authData = await authRes.json();
     
@@ -23,7 +24,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // --- HOME PAGE LOGIC (index.html) ---
+    // --- Home Page Logic ---
     if (document.getElementById('productsContainer')) {
         try {
             // API 1: Currency Rates
@@ -31,24 +32,28 @@ document.addEventListener('DOMContentLoaded', async () => {
             const currencyData = await currencyRes.json();
             exchangeRates = currencyData.rates;
 
-            // API 2: RestCountries for Shipping Destinations
-            const countriesRes = await fetch('https://restcountries.com/v3.1/all?fields=name');
-            const countries = await countriesRes.json();
-            countries.sort((a,b) => a.name.common.localeCompare(b.name.common));
+            // API 2: Shipping Destinations
+            const countriesRes = await fetch('https://flagcdn.com/en/codes.json');
+            const countriesData = await countriesRes.json();
+            
+            const countries = Object.values(countriesData);
+            countries.sort((a, b) => a.localeCompare(b));
             
             const shippingSelect = document.getElementById('shippingCountry');
             shippingSelect.innerHTML = '<option value="">Select Destination...</option>';
-            countries.forEach(c => {
-                shippingSelect.innerHTML += `<option value="${c.name.common}">${c.name.common}</option>`;
+            
+            countries.forEach(name => {
+                shippingSelect.innerHTML += `<option value="${name}">${name}</option>`;
             });
 
         } catch (err) {
-            console.log("API load error", err);
+            console.error("API load error", err);
         }
 
         loadStoreProducts();
         renderCart();
 
+        // Event listeners
         document.getElementById('currency').addEventListener('change', loadStoreProducts);
         document.getElementById('sortProducts').addEventListener('change', loadStoreProducts);
 
@@ -64,11 +69,12 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // --- ADMIN PAGE LOGIC (admin.html) ---
+    // --- Admin Page Logic ---
     if (document.getElementById('productsTable')) {
         loadAdminProducts();
         loadAggregations();
 
+        // Create Product
         document.getElementById('addBtn').addEventListener('click', async () => {
             const name = document.getElementById('prodName').value;
             const setNumber = document.getElementById('prodSetNumber').value;
@@ -92,10 +98,12 @@ document.addEventListener('DOMContentLoaded', async () => {
             loadAggregations();
         });
 
+        // Close Modal
         document.getElementById('closeModal').addEventListener('click', () => {
             document.getElementById('editModal').style.display = 'none';
         });
 
+        // Update Product
         document.getElementById('saveEditBtn').addEventListener('click', async () => {
             const id = document.getElementById('editId').value;
             const name = document.getElementById('editName').value;
@@ -115,7 +123,7 @@ document.addEventListener('DOMContentLoaded', async () => {
         });
     }
 
-    // Auth Forms (Login/Register)
+    // --- Auth Forms Logic ---
     const registerForm = document.getElementById('registerForm');
     if (registerForm) {
         registerForm.addEventListener('submit', async (e) => {
@@ -155,7 +163,9 @@ document.addEventListener('DOMContentLoaded', async () => {
     }
 });
 
-// --- HELPER FUNCTIONS ---
+// ==========================================
+// --- Helper Functions ---
+// ==========================================
 
 async function loadStoreProducts() {
     const sortVal = document.getElementById('sortProducts').value.split('_');
@@ -167,14 +177,13 @@ async function loadStoreProducts() {
     const container = document.getElementById('productsContainer');
     container.innerHTML = '';
 
-    // Working generic fallback image
     const fallbackImage = 'https://images.unsplash.com/photo-1587654780291-39c9404d746b?q=80&w=400';
 
     products.forEach(p => {
         const convertedPrice = (p.price * exchangeRates[currency]).toFixed(2);
         const symbol = currency === 'ILS' ? '₪' : (currency === 'USD' ? '$' : '€');
         
-        // Smart URL: Pulls real box art from Brickset based on Set Number
+        // Construct dynamic image URL based on setNumber
         const imgUrl = p.setNumber ? `https://images.brickset.com/sets/images/${p.setNumber}-1.jpg` : fallbackImage;
 
         container.innerHTML += `
@@ -224,7 +233,7 @@ window.removeFromCart = (index) => {
     cart.splice(index, 1);
     saveCart();
     renderCart();
-};
+}
 
 async function loadAdminProducts() {
     const res = await fetch('/api/products');
@@ -269,6 +278,7 @@ window.deleteProduct = async (id) => {
 async function loadAggregations() {
     const statsContainer = document.getElementById('statsContainer');
     const [overviewRes, catRes] = await Promise.all([ fetch('/api/stats/overview'), fetch('/api/stats/categories') ]);
+    
     const overview = await overviewRes.json();
     const categories = await catRes.json();
 
